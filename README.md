@@ -1,4 +1,4 @@
-# VSCode Coding Problem Helpers
+# VSCode Helper Scripts
 
 This repository contains a collection of small Node.js automations that make trivial tasks for me, like **creating**, **managing**, and **documenting** coding‑problem folders directly from VS Code.
 
@@ -7,7 +7,7 @@ The scripts are intended to be run via the VS Code UI (e.g. clicking a button 
 ---
 
 ## Table of Contents
-- [VSCode Coding Problem Helpers](#vscode-coding-problem-helpers)
+- [VSCode Helper Scripts](#vscode-helper-scripts)
 	- [Table of Contents](#table-of-contents)
 	- [Features](#features)
 	- [Folder Structure](#folder-structure)
