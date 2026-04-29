@@ -1,6 +1,6 @@
 # VSCode Helper Scripts
 
-This repository contains a collection of small Node.js automations that make trivial tasks for me, like **creating**, **managing**, and **documenting** coding‑problem folders directly from VS Code.
+This repository contains a collection of small typescript automations that make trivial tasks for me, like **creating**, **managing**, and **documenting** coding‑problem folders directly from VS Code.
 
 The scripts are intended to be run via the VS Code UI (e.g. clicking a button provided by a custom extension) but they work perfectly from the terminal as well.
 
@@ -18,8 +18,9 @@ The scripts are intended to be run via the VS Code UI (e.g. clicking a button 
 		- [`createGitignore`](#creategitignore)
 		- [`openParentFolders`](#openparentfolders)
 		- [`createProblemReadmeSkeleton`](#createproblemreadmeskeleton)
-	- [Configuration \& Constants](#configuration--constants)
-	- [How it works](#how-it-works)
+	- [Leetcode scripts](#leetcode-scripts)
+		- [Configuration \& Constants](#configuration--constants)
+		- [How it works](#how-it-works)
 
 ---
 
@@ -34,10 +35,10 @@ The scripts are intended to be run via the VS Code UI (e.g. clicking a button 
 
 ## Folder Structure
 ```
-js/
+ts/
 ├─ addProblemClass/           # Add a new class file to an existing problem
-│   ├─ main.mjs
-│   ├─ helpers.mjs
+│   ├─ main.ts
+│   ├─ helpers.ts
 │   └─ templates/…
 ├─ addProblemReadme/          # Build a README.md for a problem (uses Ollama/LeetCode)
 ├─ createProblemFolder/       # Create a new problem folder with solution stub
@@ -54,7 +55,7 @@ js/
 
 **How to use**
 1. Copy the class code to your clipboard.
-2. Run the script (`node addProblemClass/main.mjs`).
+2. Run the script (`node addProblemClass/main.ts`).
 3. Choose the target language and directory (the script walks the problem hierarchy).
 4. If the file already exists you can **Update** it or **Update + regenerate README**.
 
@@ -77,7 +78,7 @@ The script validates the clipboard content, prepends a language‑specific templ
 
 **Steps**
 1. (Optional) Copy a problem title to the clipboard – the script will detect it.
-2. Run `node createProblemFolder/main.mjs`.
+2. Run `node createProblemFolder/main.ts`.
 3. Answer the interactive prompts for **category**, **difficulty**, **language**.
 4. The script creates the folder hierarchy, runs a language‑specific setup script (e.g. creates a `src` folder), writes a solution stub, and optionally adds a class and a README.
 
@@ -100,8 +101,16 @@ Run the script, enter the number of levels you want to go up and it will execute
 The script asks for a problem title and writes `README.md` in the current working directory.
 
 ---
-## Configuration & Constants
-Each module has a `constants.mjs` that defines:
+
+## Leetcode scripts
+
+- `npx tsx addProblemClass/main.ts`
+- `npx tsx addProblemReadme/main.ts`
+- `npx tsx createProblemFolder/main.ts`
+- `npx tsx createProblemReadmeSkeleton/main.ts`
+
+### Configuration & Constants
+Each module has a `constants.ts` that defines:
 - `LANG_CONFIG` – supported languages (`C#`, `Python`, `Typescript`) and file extensions.
 - `LOG_DELAY` – artificial delay for nicer terminal output.
 - Paths for templates, caches, LeetCode GraphQL endpoint, Ollama API, etc.
@@ -109,8 +118,9 @@ Each module has a `constants.mjs` that defines:
 You can customise these files to add more languages or change the Ollama endpoint.
 
 ---
-## How it works
-All scripts share a common set of utilities (`helpers.mjs` & `imports.mjs`) that provide:
+
+### How it works
+All scripts share a common set of utilities (`helpers.ts` & `imports.ts`) that provide:
 - **Terminal helpers** (`log`, `clear`).
 - **Clipboard handling** (`wl-paste` / `wl-copy`).
 - **Interactive prompts** via `inquirer`.

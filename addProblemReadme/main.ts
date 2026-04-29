@@ -13,18 +13,18 @@ import {
 	exit,
 	log,
 	clear,
-} from './helpers.mjs';
-import { MODEL } from './constants.mjs';
-import { basename, existsSync, join } from './imports.mjs';
+} from './helpers.js';
+import { MODEL } from './constants.js';
+import { basename, existsSync, join } from './imports.js';
 
-// * ─── Initialize ─────────────────────────────────────────────────
+// * ─── Initialise ───────────────────────────────────────────────────────────────
 
 clear();
 await log('Adding coding problem README.md...');
 
 // * ─── Resolve target directory ─────────────────────────────────────────────────
 
-const dir        	 = await navigate();
+const dir          = await navigate();
 const problemName  = basename(dir);
 const readmePath   = join(dir, 'README.md');
 const readmeExists = existsSync(readmePath);
@@ -32,13 +32,12 @@ const readmeExists = existsSync(readmePath);
 await log(
 	readmeExists
 		? `Found README.md at: ${readmePath}`
-		: `No README.md found at: ${readmePath}`
+		: `No README.md found at: ${readmePath}`,
 );
 
 // * ─── Confirm before proceeding ────────────────────────────────────────────────
 
-const shouldProceed = await askProceed();
-if (!shouldProceed) exit('No changes made.').ok();
+if (!await askProceed()) exit('No changes made.').ok();
 
 // * ─── Gather inputs ────────────────────────────────────────────────────────────
 
@@ -53,8 +52,7 @@ if (!problemDesc) {
 	exit(
 		readmeExists
 			? `No coding problem detected at: ${readmePath}`
-			: `Failed to fetch problem description — check cache or LeetCode API connectivity.`
-		, 1
+			: `Failed to fetch problem description — check cache or LeetCode API connectivity.`,
 	).bad();
 }
 
@@ -63,11 +61,10 @@ if (!instructions || !templates) exit(`Missing markdown references at: ${join(di
 
 // * ─── Generate and write README ────────────────────────────────────────────────
 
-const prompt = buildPrompt(instructions, templates, problemDesc, code);
-const result = await runOllama(MODEL, prompt);
+const prompt  = buildPrompt(instructions, templates, problemDesc, code);
+const result  = await runOllama(MODEL, prompt);
 await createReadme(readmePath, result);
 
 // * ─── Optionally open README ───────────────────────────────────────────────────
 
-const shouldOpen = await askOpenReadme();
-if (shouldOpen) openReadme(readmePath);
+if (await askOpenReadme()) openReadme(readmePath);

@@ -1,4 +1,4 @@
-import { dirname, fileURLToPath, join } from "./imports.mjs";
+import { dirname, fileURLToPath, join } from "./imports.js";
 
 export const LOG_DELAY = 1000;
 export const CODE_PREVIEW_LEN = 255;

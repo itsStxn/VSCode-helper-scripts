@@ -4,6 +4,6 @@
 
 set -e
 
-COMMAND_DIR="$HOME/Dev/vscode/injections/js/addProblemReadme"
+COMMAND_DIR="$HOME/Dev/vscode/injections/ts/addProblemReadme"
 
-node "$COMMAND_DIR"/main.mjs
+npx tsx "$COMMAND_DIR"/main.ts

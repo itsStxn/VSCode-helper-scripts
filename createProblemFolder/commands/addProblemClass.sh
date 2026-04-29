@@ -4,6 +4,6 @@
 
 set -e
 
-COMMAND_DIR="$HOME/Dev/vscode/injections/js/addProblemClass"
+COMMAND_DIR="$HOME/Dev/vscode/injections/ts/addProblemClass"
 
-node "$COMMAND_DIR"/main.mjs --currentBase
+npx tsx "$COMMAND_DIR"/main.ts --currentBase

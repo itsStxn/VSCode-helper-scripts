@@ -1,4 +1,4 @@
-import { dirname, fileURLToPath, join } from "./imports.mjs";
+import { dirname, fileURLToPath, join } from "./imports.js";
 
 export const MODEL = 'gpt-oss:120b-cloud';
 
