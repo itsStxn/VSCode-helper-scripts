@@ -1,5 +1,7 @@
 {
 	"compilerOptions": {
+		"rootDir": "./",
+		"outDir": "dist/",
 		"target": "ES2022",
 		"module": "NodeNext",
 		"types": ["node"],
