@@ -2,7 +2,7 @@
 
 # ? Run from inside the project folder (e.g., Two Sum/)
 
-set -e
+set -euo pipefail
 
 PROJECT_DIR="C#"
 

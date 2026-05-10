@@ -2,7 +2,7 @@
 
 # ? Adds a class file to a project folder (e.g., Two Sum/)
 
-set -e
+set -euo pipefail
 
 COMMAND_DIR="$HOME/Dev/vscode/injections/ts/addProblemClass"
 

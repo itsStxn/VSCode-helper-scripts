@@ -2,7 +2,7 @@
 
 # ? Navigate to the project folder (e.g., Two Sum/) -> create README.md
 
-set -e
+set -euo pipefail
 
 COMMAND_DIR="$HOME/Dev/vscode/injections/ts/addProblemReadme"
 
