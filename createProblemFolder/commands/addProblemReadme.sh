@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ! Navigate to the project folder (e.g., Two Sum/) -> create README.md
+# ? Navigate to the project folder (e.g., Two Sum/) -> create README.md
 
 set -e
 

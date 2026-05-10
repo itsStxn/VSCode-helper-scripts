@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ! Run from inside the project folder (e.g., Two Sum/)
+# ? Run from inside the project folder (e.g., Two Sum/)
 
 set -e
 

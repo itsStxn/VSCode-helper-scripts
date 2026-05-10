@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ! Adds a class file to a project folder (e.g., Two Sum/)
+# ? Adds a class file to a project folder (e.g., Two Sum/)
 
 set -e
 
