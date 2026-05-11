@@ -16,7 +16,7 @@ import * as T from './types.js';
 
 /**
  * Creates an object with methods to exit the process with a success or failure status.
- *
+ * @param msg - Message to log.
  * - `ok`:  Logs the message and exits with code 0.
  * - `bad`: Logs the message and exits with code 1.
  */
@@ -29,8 +29,9 @@ export function exit(msg: string): T.ExitHandle {
 
 /**
  * Presents a Yes/No list prompt and returns `true` if the user selects "Yes".
- *
- * @param inverted - If `true`, shows "No" before "Yes".
+ * @param message - The prompt's message.
+ * @param inverted - When true, shows "No" before "Yes".
+ * @returns `true` if the user selects "Yes", `false` otherwise.
  */
 async function promptBinary(message: string, inverted: boolean = false): Promise<boolean> {
 	const { choice } = await ask([
@@ -56,6 +57,7 @@ export function clear(): void {
 
 /**
  * Returns a Promise that resolves after the given number of milliseconds.
+ * @param ms - Number of milliseconds.
  */
 function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -63,6 +65,7 @@ function sleep(ms: number): Promise<void> {
 
 /**
  * Logs a prefixed message to stdout, then pauses for LOG_DELAY milliseconds.
+ * @param msg - Message to log.
  */
 export async function log(msg: string): Promise<void> {
 	console.log(`>> ${msg}`);
@@ -71,6 +74,7 @@ export async function log(msg: string): Promise<void> {
 
 /**
  * Logs a prefixed warning to stderr, then pauses for LOG_DELAY milliseconds.
+ * @param msg - Message to log.
  */
 async function warn(msg: string): Promise<void> {
 	console.warn(`>> ${msg}`);
@@ -99,7 +103,7 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
  * select "This" to return the current directory, "Parent" to go up, or any
  * subdirectory to navigate into it. Hidden entries are excluded.
  *
- * @returns The absolute path of the selected directory.
+ * @returns Promise containing a absolute path string of the selected directory.
  */
 export async function navigate(): Promise<string> {
 	let currentDir = $.BASE_DIR;
@@ -129,13 +133,15 @@ export async function navigate(): Promise<string> {
 
 /**
  * Prompts the user to confirm whether to add or update a README file.
- */
+ * @returns Promise containing a boolean for to represent Yes or No.
+*/
 export function askProceed(): Promise<boolean> {
 	return promptBinary('Add/update README:');
 }
 
 /**
  * Prompts the user to confirm whether to open the README file.
+ * @returns Promise containing a boolean for to represent Yes or No.
  */
 export function askOpenReadme(): Promise<boolean> {
 	return promptBinary('Open README:');
@@ -143,6 +149,8 @@ export function askOpenReadme(): Promise<boolean> {
 
 /**
  * Opens a file in Visual Studio Code.
+ * @param filePath - The path to the README.md file.
+ * 
  */
 export function openReadme(filePath: string): void {
 	execSync(`code "${filePath}"`);
@@ -150,6 +158,8 @@ export function openReadme(filePath: string): void {
 
 /**
  * Writes content to a README file at the given path and logs confirmation.
+ * @param filePath - The path to the README.md file.
+ * @param content - The content of the README.md file.
  */
 export async function createReadme(filePath: string, content: string): Promise<void> {
 	writeFileSync(filePath, content);
@@ -159,10 +169,10 @@ export async function createReadme(filePath: string, content: string): Promise<v
 // * ─── Clipboard ────────────────────────────────────────────────────────────────
 
 /**
- * Reads and returns the current clipboard content using `wl-paste`.
- * Returns an empty string if the clipboard is empty.
+ * Retrieves the current clipboard content using the `wl-paste` command.
  *
- * @throws {Error} If `wl-paste` fails for a reason other than an empty clipboard.
+ * @returns The clipboard content as a string.
+ * @throws {Error} If an unexpected clipboard error occurs.
  */
 function getClipboard(): string {
 	try {
@@ -176,8 +186,6 @@ function getClipboard(): string {
 
 /**
  * Clears the clipboard using `wl-copy` and logs confirmation.
- *
- * @throws {Error} If `wl-copy` is not available or fails to execute.
  */
 export async function emptyClipboard(): Promise<void> {
 	execSync('wl-copy', { stdio: 'ignore' });
@@ -190,6 +198,7 @@ export async function emptyClipboard(): Promise<void> {
  * Scans the given location for language subdirectories recognised by LANG_CONFIG,
  * then builds a markdown string of fenced code blocks grouped by language and file.
  *
+ * @param location - The location for language subdirectories recognised by LANG_CONFIG.
  * @throws {Error} If a code file exists but is empty.
  * @returns A markdown-formatted string, or an empty string if no valid files are found.
  */
@@ -224,6 +233,8 @@ export function detectCode(location: string): string {
 
 /**
  * Returns `true` if the given text matches all problem description patterns.
+ * 
+ * @param text - Input string.
  */
 function isProblemDesc(text: string): boolean {
 	return $.PROBLEM_DESC_PATTERNS.every((pattern) => pattern.test(text));
@@ -234,6 +245,8 @@ function isProblemDesc(text: string): boolean {
 /**
  * Interactively prompts the user to confirm clipboard content as a valid problem description.
  * Loops until the content passes all validation checks, then clears the clipboard and returns it.
+ * 
+ * @returns Promise containing the problem description as a string from the clipboard.
  */
 async function extractProblemDesc(): Promise<string> {
 	const max      = $.PROBLEM_DESC_PREVIEW_LEN;
@@ -268,6 +281,7 @@ async function extractProblemDesc(): Promise<string> {
  * Reads a problem file, extracts the description section before the separator,
  * and returns it wrapped in a fenced HTML code block.
  *
+ * @param filePath - The path to the README.md file.
  * @returns The formatted HTML block, or an empty string if the separator is absent.
  */
 export function getProblemDescReadme(filePath: string): string {
@@ -283,6 +297,9 @@ export function getProblemDescReadme(filePath: string): string {
 
 /**
  * Reads and returns the trimmed contents of the instructions and templates files.
+ * 
+ * - `instructions`: String with md formatted instructions.
+ * - `templates`: String with md formatted instruction templates.
  */
 export function getReferences(): T.References {
 	const instructions = readFileSync($.INSTRUCTIONS_PATH, 'utf-8').trim();
@@ -293,6 +310,11 @@ export function getReferences(): T.References {
 /**
  * Builds a formatted prompt string combining instructions, templates,
  * problem description, and solution code.
+ * 
+ *	@param instructions - md formatted instructions,
+ *	@param templates - md formatted instruction templates,
+ *	@param problemDesc - Description text of the problem,
+ *	@param code - Problem code,
  */
 export function buildPrompt(
 	instructions: string,
@@ -326,6 +348,9 @@ ${code}
 /**
  * Fetches a mapping of LeetCode question titles (lowercased) to their title slugs
  * via the GraphQL API.
+ * 
+ * @returns Promise containing an object of string problem names mapped 
+ * to their respective string slugs.
  */
 async function fetchSlugMap(): Promise<T.SlugMap> {
 	const res = await fetch($.LEETCODE_GRAPHQL, {
@@ -353,6 +378,10 @@ async function fetchSlugMap(): Promise<T.SlugMap> {
 /**
  * Returns a cached slug map from disk if available and not stale.
  * Fetches and writes a fresh copy when the cache is missing, empty, or `forceRefresh` is `true`.
+ *
+ * @param forceRefresh - Boolean specifying whether to refresh the cache or not. 
+ * @returns Promise containing an object of string problem names mapped 
+ * to their respective string slugs.
  */
 async function getSlugMapCached(forceRefresh: boolean): Promise<T.SlugMap> {
 	if (!forceRefresh && existsSync($.SLUG_CACHE_PATH)) {
@@ -379,6 +408,9 @@ async function getSlugMapCached(forceRefresh: boolean): Promise<T.SlugMap> {
  * - Lowercases the result
  * - Removes apostrophes
  * - Replaces non-alphanumeric characters with hyphens
+ * 
+ * @param title - The problem name's title.
+ * @returns The slug string.
  */
 function slugify(title: string): string {
 	return title
@@ -394,6 +426,10 @@ function slugify(title: string): string {
 /**
  * Resolves a problem name to its LeetCode title slug using the cached slug map.
  * Falls back to `slugify` and logs a warning if no mapped slug is found.
+ * 
+ * @param problemName - Name of the problem. 
+ * @param forceRefresh - Boolean specifying whether to refresh the cache or not. 
+ * @returns Promise containing the string slug. 
  */
 async function toSlug(problemName: string, forceRefresh: boolean): Promise<string> {
 	const slugMap = await getSlugMapCached(forceRefresh);
@@ -411,6 +447,7 @@ async function toSlug(problemName: string, forceRefresh: boolean): Promise<strin
 /**
  * Fetches the content of a LeetCode problem by its title slug via the GraphQL API.
  *
+ * @param titleSlug - Slug of the problem. 
  * @throws {Error} If the problem is not found for the given slug.
  */
 async function fetchProblemDesc(titleSlug: string): Promise<{ content: string }> {
@@ -444,6 +481,7 @@ async function fetchProblemDesc(titleSlug: string): Promise<{ content: string }>
 /**
  * Wraps a problem's title and content into a fenced HTML markdown block.
  *
+ * param `{ title, content }` - Object containing the string title and string problem description. 
  * @returns The formatted HTML block, or an empty string if content is falsy.
  */
 function buildProblemHTML({ title, content }: T.ProblemData): string {
@@ -456,6 +494,10 @@ function buildProblemHTML({ title, content }: T.ProblemData): string {
 /**
  * Fetches problem data for the given slug, falling back to manual clipboard
  * extraction if the API request fails.
+ * 
+ * @param problemName - Name of the problem. 
+ * @param titleSlug - Slug of the problem. 
+ * @returns `{ title, content }` - Object containing the string title and string problem description. 
  */
 async function getProblemData(problemName: string, titleSlug: string): Promise<T.ProblemData> {
 	try {
@@ -474,6 +516,9 @@ async function getProblemData(problemName: string, titleSlug: string): Promise<T
  * available. Prompts the user about forcing a cache refresh. If the slug is absent
  * from the cache, fetches and updates it. Falls back to rebuilding the entire cache
  * if reading fails.
+ * 
+ * @param problemName - Name of the problem. 
+ * @returns Promise containing the string problem descripiton. 
  */
 export async function getProblemDescCached(problemName: string): Promise<string> {
 	const forceRefresh = await promptBinary('Rebuild cache:', true);
@@ -509,7 +554,10 @@ export async function getProblemDescCached(problemName: string): Promise<string>
 /**
  * Sends a prompt to the Ollama API using the specified model and returns the response text.
  *
+ * @param model - Name of the model.
+ * @param prompt - Prompt message.
  * @throws {Error} If the API request fails or returns a non-OK status.
+ * @returns The response string from the model.
  */
 export async function runOllama(model: string, prompt: string): Promise<string> {
 	const res = await fetch($.OLLAMA_API, {

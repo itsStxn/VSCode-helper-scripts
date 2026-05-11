@@ -11,6 +11,7 @@ import {
 	readdirSync,
 	statSync,
 	mkdirSync,
+	basename,
 } from './imports.js';
 import * as $ from './constants.js';
 import * as T from './types.js';
@@ -28,6 +29,8 @@ export function clear(): void {
 
 /**
  * Pauses execution for a specified number of milliseconds.
+ * 
+ * @param ms - Number of milliseconds.
  */
 function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -35,6 +38,8 @@ function sleep(ms: number): Promise<void> {
 
 /**
  * Logs a message to the console with a prefix and applies a delay.
+ * 
+ * @param msg - Message to log.
  */
 export async function log(msg: string): Promise<void> {
 	console.log(`>> ${msg}`);
@@ -61,6 +66,7 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
 /**
  * Retrieves the current clipboard content using the `wl-paste` command.
  *
+ * @returns The clipboard content as a string.
  * @throws {Error} If an unexpected clipboard error occurs.
  */
 function getClipboard(): string {
@@ -88,7 +94,12 @@ export async function emptyClipboard(): Promise<void> {
 /**
  * Validates whether a string qualifies as a valid title based on predefined
  * patterns and length constraints.
- */
+ * 
+ * @param text - Text to validate.
+ * @param minLength - The minimum length for a valid title. Defaulted to 0.
+ * @param maxLength - The maximum length for a valid title. Defaulted to Number.MAX_SAFE_INTIGER.
+ * @returns A boolean answering whether the text is valid or not.
+*/
 function isTitle(
 	text: string,
 	minLength: number = 0,
@@ -100,6 +111,10 @@ function isTitle(
 
 /**
  * Retrieves a title from the clipboard if it meets the specified length requirements.
+ * 
+ * @param minLength - The minimum length for a valid title.
+ * @param maxLength - The maximum length for a valid title.
+ * @returns The valid title retrieved from the clipboard as a string.
  */
 export function getTitle(minLength: number, maxLength: number): string {
 	const text = getClipboard().trim();
@@ -110,7 +125,8 @@ export function getTitle(minLength: number, maxLength: number): string {
 
 /**
  * Creates an object with `ok` and `bad` methods that log a message and exit the process.
- *
+ * 
+ * @param msg - Message to log.
  * - `ok`: Exits with code 0 (success).
  * - `bad`: Exits with code 1 (failure).
  */
@@ -124,6 +140,7 @@ function exit(msg: string): T.ExitHandle {
 /**
  * Prompts the user with a binary yes/no question.
  *
+ * @param message - The prompt's message.
  * @param inverted - When true, shows "No" before "Yes".
  * @returns `true` if the user selects "Yes", `false` otherwise.
  */
@@ -147,7 +164,7 @@ async function promptBinary(message: string, inverted: boolean = false): Promise
  * - The code is not empty.
  * - The code is not just a title.
  *
- * Upon success, clears the clipboard and returns the code.
+ * @returns The code, then clears the clipboard.
  */
 async function extractCode(): Promise<string> {
 	const truncate = (text: string): string =>
@@ -228,6 +245,9 @@ export async function navigate(detectedTitle: string): Promise<Record<string, st
 
 /**
  * Retrieves a language template and prepends it to the given clipboard content.
+ * 
+ * @param language - The coding language.
+ * @param clipboard - The text from the clipboard.
  */
 function getTemplatePrepended(language: string, clipboard: string): string {
 	const templatePath = join($.CURR_DIR, 'templates', $.LANG_CONFIG[language].template);
@@ -236,24 +256,38 @@ function getTemplatePrepended(language: string, clipboard: string): string {
 }
 
 /**
- * Extracts code from the clipboard and prepends the language-specific template.
- */
-async function writeSolutionContent(language: string): Promise<string> {
+ * Extracts code from the clipboard and prepends the language-specific template. 
+ * Then tries to insert the prorlem name to the content.
+ * 
+ * @param problemDir - The problem's diractory path.
+ * @param language - The coding language.
+ * @returns A promise containg the content of the solution file.
+*/
+async function writeSolutionContent(problemDir: string, language: string): Promise<string> {
 	const code = await extractCode();
-	return getTemplatePrepended(language, code);
+	let content = getTemplatePrepended(language, code);
+	const problemName = problemDir.replaceAll(' ', '_');
+	
+	return content.replaceAll('$problemName', problemName);
 }
 
 /**
  * Creates a solution file at the given path with language-specific content.
- */
+ * 
+ * @param solutionPath - The solution file's path.
+ * @param language - The coding language.
+*/
 async function createSolutionFile(solutionPath: string, language: string): Promise<void> {
-	const code = await writeSolutionContent(language);
+	const problemName = basename(dirname(dirname(solutionPath)));
+	const code = await writeSolutionContent(problemName, language);
 	writeFileSync(solutionPath, code, 'utf8');
 }
 
 /**
  * Executes a language-specific setup script in the given problem directory.
- *
+ * 
+ * @param problemDir - The problem's diractory path.
+ * @param language - The coding language.
  * @returns The trimmed stdout output from the setup script.
  * @throws {Error} If the setup script is not found at the expected path.
  */
@@ -266,8 +300,9 @@ function runSetupScript(language: string, problemDir: string): string {
 // * ─── Inspection ───────────────────────────────────────────────────────────────
 
 /**
- * Inspects a solution file by offering to open it in VS Code and/or its
- * directory in a terminal.
+ * Inspects a solution file by offering to open it in VS Code and/or its directory in a terminal.
+ * 
+ * @param solutionPath - The solution file's path.
  */
 async function inspectSolutionFile(solutionPath: string): Promise<void> {
 	if (await promptBinary(`Open solution's file:`)) {
@@ -311,7 +346,9 @@ function runCommand(cmd: string, cwd: string): Promise<void> {
 
 /**
  * Prompts the user to optionally add a `README.md` to the given problem directory.
- */
+ * 
+ * @param problemDir - The problem's diractory path.
+*/
 async function addProblemReadme(problemDir: string): Promise<void> {
 	if (await promptBinary('Add README.md:'))
 		runCommand('addProblemReadme', problemDir);
@@ -319,7 +356,8 @@ async function addProblemReadme(problemDir: string): Promise<void> {
 
 /**
  * Prompts the user to repeatedly add new problem classes until they decline.
- *
+ * 
+ * @param languageDir - Directory containing language-specific project files.
  * @returns `true` if at least one class was added, `false` otherwise.
  */
 async function addProblemClass(languageDir: string): Promise<boolean> {
@@ -399,7 +437,7 @@ export async function handleNewProject(
 	if (output.length === 0) {
 		exit(`Setup script ran, but its output is unknown. Check: ${languageDir}`).bad();
 	}
-
+	
 	await log(output);
 	await createSolutionFile(solutionPath, language);
 	await inspectSolutionFile(solutionPath);
@@ -408,6 +446,9 @@ export async function handleNewProject(
 
 /**
  * Prompts the user to either add new problem classes or add a `README.md` to the given problem directory.
+ * 
+ * @param languageDir - Expected directory created by the setup script.
+ * @param problemDir - Directory where the problem setup will be created.
  */
 export async function addClassOrReadme(languageDir: string, problemDir: string): Promise<void> {
 	const added = await addProblemClass(languageDir);

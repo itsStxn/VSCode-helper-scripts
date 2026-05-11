@@ -18,10 +18,11 @@ import * as T from './types.js';
 // * ─── Process ──────────────────────────────────────────────────────────────────
 
 /**
- * Creates an object with methods to exit the process with a success or failure status.
- *
- * - `ok`:  Logs the message and exits with code 0.
- * - `bad`: Logs the message and exits with code 1.
+ * Creates an object with `ok` and `bad` methods that log a message and exit the process.
+ * 
+ * @param msg - Message to log.
+ * - `ok`: Exits with code 0 (success).
+ * - `bad`: Exits with code 1 (failure).
  */
 function exit(msg: string): T.ExitHandle {
 	return {
@@ -33,15 +34,19 @@ function exit(msg: string): T.ExitHandle {
 // * ─── Terminal ─────────────────────────────────────────────────────────────────
 
 /**
- * Returns a Promise that resolves after the given number of milliseconds.
+ * Pauses execution for a specified number of milliseconds.
+ * 
+ * @param ms - Number of milliseconds.
  */
 function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Logs a prefixed message to stdout, then pauses for LOG_DELAY milliseconds.
- */
+ * Logs a message to the console with a prefix and applies a delay.
+ * 
+ * @param msg - Message to log.
+*/
 export async function log(msg: string): Promise<void> {
 	console.log(`>> ${msg}`);
 	await sleep($.LOG_DELAY);
@@ -49,6 +54,7 @@ export async function log(msg: string): Promise<void> {
 
 /**
  * Logs a prefixed warning to stderr, then pauses for LOG_DELAY milliseconds.
+ * @param msg - Message to log.
  */
 async function warn(msg: string): Promise<void> {
 	console.warn(`>> ${msg}`);
@@ -71,7 +77,7 @@ export function clear(): void {
  *
  * @param data - Inquirer prompt configuration object defining questions and
  * expected inputs.
- * @returns A promise resolving to an object containing the user's responses.
+ * @returns Promise resolving to an object containing the user's responses.
  */
 function ask(data: Record<string, any>): Promise<Record<string, string>> {
 	if ($.INQUIRER_CLEAR_FIRST) clear();
@@ -81,10 +87,10 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
 // * ─── Clipboard ────────────────────────────────────────────────────────────────
 
 /**
- * Reads and returns the current clipboard content using `wl-paste`.
- * Returns an empty string if the clipboard is empty.
+ * Retrieves the current clipboard content using the `wl-paste` command.
  *
- * @throws {Error} If `wl-paste` fails for a reason other than an empty clipboard.
+ * @returns The clipboard content as a string.
+ * @throws {Error} If an unexpected clipboard error occurs.
  */
 function getClipboard(): string {
 	try {
@@ -109,6 +115,8 @@ export async function emptyClipboard(): Promise<void> {
 /**
  * Returns `true` if the given text matches all title patterns, meaning it is
  * likely a title rather than code.
+ * 
+ * @param text -Text from clipboard.
  */
 function isNotCode(text: string): boolean {
 	const lengthPattern = new RegExp(`^.{0,${Number.MAX_SAFE_INTEGER}}$`);
@@ -123,6 +131,7 @@ function isNotCode(text: string): boolean {
  * and returns the code.
  *
  * @param previewLength - Maximum number of characters to show in the confirmation prompt.
+ * @returns Promise containing string code from the clipboard.
  */
 async function extractCode(previewLength: number): Promise<string> {
 	const truncate = (text: string): string =>
@@ -154,6 +163,10 @@ async function extractCode(previewLength: number): Promise<string> {
 
 /**
  * Prepends the language's template file (if it exists) to the given code string.
+ * 
+ * @param language - The coding language.
+ * @param code - The code from the clipboard.
+ * @returns Full template string.
  */
 function getTemplatePrepended(language: string, code: string): string {
 	const templatePath = join($.CURR_DIR, 'templates', $.LANG_CONFIG[language].template);
@@ -164,18 +177,28 @@ function getTemplatePrepended(language: string, code: string): string {
 // * ─── Class Files ──────────────────────────────────────────────────────────────
 
 /**
- * Prompts the user to confirm clipboard code, prepends the language template,
- * and writes the result to disk.
- */
+ * Prompts the user to confirm clipboard code, prepends the language template, 
+ * tries to insert the prorlem name to the content, and writes the result to disk.
+ * 
+ * @param classPath - The class file's path.
+ * @param language - The coding language.
+*/
 async function createClassFile(classPath: string, language: string): Promise<void> {
 	const code    = await extractCode($.CODE_PREVIEW_LEN);
-	const content = getTemplatePrepended(language, code);
+	const template = getTemplatePrepended(language, code);
+
+	const problemDir = basename(dirname(dirname(classPath)));
+	const problemName = problemDir.replaceAll(' ', '_');
+	const content = template.replaceAll('$problemName', problemName);
+
 	writeFileSync(classPath, content, 'utf8');
 }
 
 /**
  * Prompts the user to optionally open the class file in VS Code and/or open
  * its parent directory in a new terminal window.
+ * 
+ * @param classPath - The class file's path.
  */
 async function inspectClassFile(classPath: string): Promise<void> {
 	if (await promptBinary('Open class file:')) {
@@ -194,7 +217,10 @@ async function inspectClassFile(classPath: string): Promise<void> {
 /**
  * Returns all non-hidden subdirectories within the given path.
  * Exits the process with a failure code if none are found.
- */
+ * 
+ * @param dirPath - The path to a directory.
+ * @returns Array of string directories.
+*/
 function getDirs(dirPath: string): string[] {
 	const dirs = readdirSync(dirPath).filter(
 		(entry) => !entry.startsWith('.') && statSync(join(dirPath, entry)).isDirectory(),
@@ -208,6 +234,9 @@ function getDirs(dirPath: string): string[] {
 /**
  * Filters a list of language folder names to only those recognised by LANG_CONFIG.
  * Warns about unrecognised entries and exits if none are valid.
+ * 
+ * @param existingLangs - String array of existing coding language directories.
+ * @returns Array of string directories.
  */
 function getKnownLangs(existingLangs: string[]): string[] {
 	const unknown = existingLangs.filter((l) => !(l in $.LANG_CONFIG));
@@ -226,6 +255,7 @@ function getKnownLangs(existingLangs: string[]): string[] {
 /**
  * Runs the `addProblemReadme` shell script in the given problem directory.
  *
+ * @param problemDir - Path to the coding problem directory.
  * @throws {Error} If the script exits with a non-zero code.
  */
 function addProblemReadme(problemDir: string): Promise<void> {
@@ -245,8 +275,10 @@ function addProblemReadme(problemDir: string): Promise<void> {
 /**
  * Presents a Yes/No list prompt and returns `true` if the user selects "Yes".
  *
+ * @param message - Prompt message.
  * @param inverted - If `true`, shows "No" before "Yes".
- */
+ * @returns Promise containing a boolean representing Yes or No.
+*/
 async function promptBinary(message: string, inverted: boolean = false): Promise<boolean> {
 	const { choice } = await ask([
 		{
@@ -262,8 +294,11 @@ async function promptBinary(message: string, inverted: boolean = false): Promise
 /**
  * Presents a list prompt of subdirectories within the given base path and returns
  * the selected directory name.
- *
- * @param filter - Optional function to filter the list of directories before prompting.
+*
+* @param base - Path to the base directory.
+* @param message - Prompt message.
+* @param filter - Optional function to filter the list of directories before prompting.
+ * @returns Promise containing a string directory path.
  */
 async function selectDir(
 	base:    string,
@@ -285,6 +320,9 @@ async function selectDir(
 /**
  * Prompts the user to enter a class file name and returns it with the correct
  * extension appended.
+ * 
+ * @param language - The coding language.
+ * @returns Promise with the string class name.
  */
 async function promptClassName(language: string): Promise<string> {
 	const { className } = await ask([
@@ -303,6 +341,8 @@ async function promptClassName(language: string): Promise<string> {
 /**
  * Scans the segments of the given path from right to left and returns the first
  * segment that matches a key in LANG_CONFIG, or `null` if none is found.
+ * 
+ * @param path - Path to a directory.
  */
 function detectLangInPath(path: string): string | null {
 	const parts = path.split(/[\\/]/).filter(Boolean);
@@ -318,6 +358,8 @@ function detectLangInPath(path: string): string | null {
  * If a language is detected in BASE_DIR, it skips interactive category/difficulty/title
  * selection and derives the paths directly. Otherwise, the user is guided through
  * selecting each level of the directory hierarchy.
+ * 
+ * @returns `{ language, problemDir, classPath }` - Object with navigation string details.
  */
 export async function navigate(): Promise<T.NavigationResult> {
 	const detectedLang = detectLangInPath($.BASE_DIR);
