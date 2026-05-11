@@ -162,7 +162,7 @@ export function openReadme(filePath: string): void {
  * @param content - The content of the README.md file.
  */
 export async function createReadme(filePath: string, content: string): Promise<void> {
-	writeFileSync(filePath, content);
+	writeFileSync(filePath, content + "\n");
 	await log(`✅ README created at: ${filePath}`);
 }
 
