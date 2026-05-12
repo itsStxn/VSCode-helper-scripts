@@ -1,5 +1,5 @@
-import { clear, handleExistingClass, handleNewClass, log, navigate } from './helpers.js';
-import { existsSync } from './imports.js';
+import { clear, copyToClipboard, handleExistingClass, handleNewClass, log, navigate } from './helpers.js';
+import { basename, existsSync } from './imports.js';
 
 // * ─── Initialise ───────────────────────────────────────────────────────────────
 
@@ -15,3 +15,5 @@ if (existsSync(classPath)) {
 } else {
 	await handleNewClass(classPath, language, problemDir);
 }
+
+await copyToClipboard(basename(problemDir));

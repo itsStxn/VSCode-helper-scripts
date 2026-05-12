@@ -87,6 +87,15 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
 // * ─── Clipboard ────────────────────────────────────────────────────────────────
 
 /**
+ * Copies text to clipboard using `wl-copy` (Wayland).
+ * @param text Text to copy
+ */
+export async function copyToClipboard(text: string) {
+	execSync(`wl-copy "${text}"`);
+	await log(`"${text}" has been copied to the clipboard`);
+}
+
+/**
  * Retrieves the current clipboard content using the `wl-paste` command.
  *
  * @returns The clipboard content as a string.
@@ -359,7 +368,7 @@ function detectLangInPath(path: string): string | null {
  * selection and derives the paths directly. Otherwise, the user is guided through
  * selecting each level of the directory hierarchy.
  * 
- * @returns `{ language, problemDir, classPath }` - Object with navigation string details.
+ * @returns `{ title, language, problemDir, classPath, title }` - Object with navigation string details.
  */
 export async function navigate(): Promise<T.NavigationResult> {
 	const detectedLang = detectLangInPath($.BASE_DIR);

@@ -9,6 +9,7 @@ import {
 	checkProblemCategoryReadme,
 	updateProblemCategoryCache,
 	updateProblemCategoryReadme,
+	copyToClipboard,
 } from './helpers.js';
 import * as $ from './constants.js';
 import { existsSync, join } from './imports.js';
@@ -42,5 +43,5 @@ if (existsSync(languageDir)) {
 	await handleNewProject(problemDir, languageDir, solutionPath, language);
 }
 
-updateProblemCategoryReadme(category, cache);
-
+await updateProblemCategoryReadme(category, cache);
+await copyToClipboard(title);

@@ -64,6 +64,15 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
 // * ─── Clipboard ────────────────────────────────────────────────────────────────
 
 /**
+ * Copies text to clipboard using `wl-copy` (Wayland).
+ * @param text Text to copy
+ */
+export async function copyToClipboard(text: string) {
+	execSync(`wl-copy "${text}"`);
+	await log(`"${text}" has been copied to the clipboard`);
+}
+
+/**
  * Retrieves the current clipboard content using the `wl-paste` command.
  *
  * @returns The clipboard content as a string.
