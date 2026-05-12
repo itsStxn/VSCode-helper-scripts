@@ -90,8 +90,18 @@ function ask(data: Record<string, any>): Promise<Record<string, string>> {
  * Copies text to clipboard using `wl-copy` (Wayland).
  * @param text Text to copy
  */
-export async function copyToClipboard(text: string) {
-	execSync(`wl-copy "${text}"`);
+export async function copyToClipboard(text: string): Promise<void> {
+	await new Promise<void>((resolve, reject) => {
+		const proc = spawn("wl-copy", [], {
+			stdio: ["pipe", "ignore", "ignore"],
+		});
+
+		proc.stdin.end(text);
+
+		proc.on("error", reject);
+		proc.on("close", () => resolve());
+	});
+
 	await log(`"${text}" has been copied to the clipboard`);
 }
 
