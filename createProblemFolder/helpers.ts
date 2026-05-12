@@ -124,6 +124,17 @@ export function getTitle(minLength: number, maxLength: number): string {
 // * ─── Utilities ────────────────────────────────────────────────────────────────
 
 /**
+ * Capitalizes the first letter of a string.
+ *
+ * @param word - Input string.
+ * @returns String with first letter capitalized, or empty string if input is empty.
+ */
+function capitalize(word: string): string {
+	if (!word) return '';
+	return word[0].toUpperCase() + word.slice(1);
+}
+
+/**
  * Creates an object with `ok` and `bad` methods that log a message and exit the process.
  * 
  * @param msg - Message to log.
@@ -351,7 +362,7 @@ function runCommand(cmd: string, cwd: string): Promise<void> {
 */
 async function addProblemReadme(problemDir: string): Promise<void> {
 	if (await promptBinary('Add README.md:'))
-		runCommand('addProblemReadme', problemDir);
+		await runCommand('addProblemReadme', problemDir);
 }
 
 /**
@@ -453,4 +464,137 @@ export async function handleNewProject(
 export async function addClassOrReadme(languageDir: string, problemDir: string): Promise<void> {
 	const added = await addProblemClass(languageDir);
 	if (!added) await addProblemReadme(problemDir);
+}
+
+// * ─── Category README Helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Updates the problem category cache by adding a new problem title under the
+ * specified difficulty level.
+ *
+ * If the cache file does not exist, it is created with default difficulty
+ * sections (easy, medium, hard). Duplicate titles are ignored to prevent
+ * redundant entries.
+ *
+ * Persists the updated cache to disk and logs the update status.
+ *
+ * @param category - The problem category folder name.
+ * @param difficulty - Difficulty level ("easy", "medium", or "hard").
+ * @param title - Problem title to add to the cache.
+ * @returns The updated problem category cache.
+ */
+export async function updateProblemCategoryCache(category: string, difficulty: string, title: string) : Promise<T.ProblemCategory> {
+	const categoryDir = join($.BASE_DIR, category);
+	const filename = 'problem_category_cache.json';
+	const filePath = join(categoryDir, filename);
+
+	let cache: T.ProblemCategory = {
+		easy: [] as string[],	
+		medium: [] as string[],	
+		hard: [] as string[]	
+	};
+
+	if (existsSync(filePath)) {
+		const fileContent = readFileSync(filePath, 'utf8');
+		if (fileContent) cache = JSON.parse(fileContent);
+	}
+
+	if (cache[difficulty].includes(title)) {
+		await log(`${category}/ already has ${title}, no changes were made`);
+		return cache;
+	}
+
+	cache[difficulty].push(title);
+	writeFileSync(filePath, JSON.stringify(cache, null, 2), 'utf8');
+	await log(`✅ ${category}/ cache updated: ${filePath}`);
+
+	return cache;
+}
+
+/**
+ * Validates that a category README.md file exists and contains the required
+ * structure for problem documentation.
+ *
+ * Specifically ensures that the README includes a "## Difficulties" section
+ * and does not incorrectly omit required structural sections such as
+ * "## Patterns".
+ *
+ * @param category - The problem category folder name.
+ * @throws Terminates execution if the README file is missing or invalid.
+ */
+export function checkProblemCategoryReadme(category: string) : void {
+	const categoryDir = join($.BASE_DIR, category);
+	const readmeFile = join(categoryDir, 'README.md');
+	
+	if (!existsSync(readmeFile))
+		exit(`'${category}/ does not contain README.md: ${categoryDir}'`).bad();
+	
+	const content = readFileSync(readmeFile, 'utf-8');
+
+	if (content.includes('## Difficulties\n') && !content.includes('## Patterns\n'))
+		exit(`${category}/README.md must have "## Difficulties" and "## Patterns" subtitles: ${readmeFile}`).bad();
+}
+
+/**
+ * Builds a formatted markdown string representing the problem list grouped
+ * by difficulty.
+ *
+ * Only includes difficulty sections that contain at least one problem.
+ * Each section is rendered as a markdown header followed by a bullet list
+ * of problem titles.
+ *
+ * @param cache - Problem category cache containing grouped problem titles.
+ * @returns A formatted markdown string representing the grouped problem list.
+ */
+function buildProblemList(cache: T.ProblemCategory): string {
+	return Object.entries(cache)
+		.filter(([, titles]) => titles.length > 0)
+		.map(([difficulty, titles]) => {
+			const header = `### ${capitalize(difficulty)}`;
+			const items = titles.map(title => `- ${title}`).join('\n');
+			return `${header}\n\n${items}`;
+		})
+		.join('\n\n')
+		.trim();
+}
+
+/**
+ * Updates the README.md file of a problem category by injecting or replacing
+ * the problem list section with the latest cached data.
+ *
+ * Detects the existing problem list block using a predefined regex pattern
+ * and replaces it with a freshly generated markdown list. If no existing
+ * block is found, the function appends a new "## Difficulties" section.
+ *
+ * Ensures the README remains synchronized with the current cache state.
+ *
+ * @param category - The problem category folder name.
+ * @param cache - The current problem category cache.
+ * @throws Terminates execution if multiple or ambiguous problem list
+ * sections are detected.
+ */
+export async function updateProblemCategoryReadme(category: string, cache: T.ProblemCategory) : Promise<void> {
+	const categoryDir = join($.BASE_DIR, category);
+	const readmeFile = join(categoryDir, 'README.md');
+	const content = readFileSync(readmeFile, 'utf-8');
+	
+	const matches = new RegExp($.CATEGORY_README_PATTERN).exec(content) || [];
+	let newProblemList = '';
+	let oldProblemList = '';
+	
+	if (matches.length == 0) {
+		oldProblemList = '## Difficulties';
+		newProblemList = '## Difficulties\n\n' + buildProblemList(cache);
+	}
+	else if (matches.length == 1) {
+		oldProblemList = matches[0].trim();
+		newProblemList = buildProblemList(cache);
+	}
+	else
+		exit(`Ambiguous problem list in ${category}/: ${readmeFile}`).bad();
+	
+	const newContent = content.replace(oldProblemList, newProblemList);
+
+	writeFileSync(readmeFile, newContent, 'utf8');
+	await log(`✅ ${category}/README.md updated: ${readmeFile}`);
 }

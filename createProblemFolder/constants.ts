@@ -40,3 +40,5 @@ export const TITLE_PATTERNS = [
 	/^[^\n\r\t]+$/,
 	/^[A-Za-z0-9]/,
 ];
+
+export const CATEGORY_README_PATTERN = /(?<=## Difficulties\n)[\s\S]+(?=\n## Patterns)/;

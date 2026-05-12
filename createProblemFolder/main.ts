@@ -6,6 +6,9 @@ import {
 	navigate,
 	handleExistingProject,
 	handleNewProject,
+	checkProblemCategoryReadme,
+	updateProblemCategoryCache,
+	updateProblemCategoryReadme,
 } from './helpers.js';
 import * as $ from './constants.js';
 import { existsSync, join } from './imports.js';
@@ -26,6 +29,11 @@ const problemDir   = join($.BASE_DIR, category, difficulty, title.trim());
 const languageDir  = join(problemDir, language);
 const solutionPath = join(languageDir, $.LANG_CONFIG[language].solution);
 
+// * ─── Prepare problem category README.md ───────────────────────────────────────
+
+checkProblemCategoryReadme(category);
+const cache = await updateProblemCategoryCache(category, difficulty, title);
+
 // * ─── Create or update ─────────────────────────────────────────────────────────
 
 if (existsSync(languageDir)) {
@@ -33,3 +41,6 @@ if (existsSync(languageDir)) {
 } else {
 	await handleNewProject(problemDir, languageDir, solutionPath, language);
 }
+
+updateProblemCategoryReadme(category, cache);
+
