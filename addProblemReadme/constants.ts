@@ -37,6 +37,6 @@ export const STATUS = {
 };
 
 export const PROBLEM_DESC_PATTERNS = [
-	/[\s\S]+Example 1:[\s\S]+(Example \d:[\s\S]+)*Constraints:[\s\S]+/gm,
+	/[\s\S]+Example 1:[\s\S]+(Example \d:[\s\S]+)*(Constraints:[\s\S]+)*/gm,
 	/Input:[\s\S]+Output:[\s\S]+(Explanation:[\s\S]+)*/gm,
 ];
