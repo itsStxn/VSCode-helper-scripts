@@ -296,7 +296,7 @@ function getTemplatePrepended(language: string, clipboard: string): string {
 async function writeSolutionContent(problemDir: string, language: string): Promise<string> {
 	const code = await extractCode();
 	let content = getTemplatePrepended(language, code);
-	const problemName = problemDir.replaceAll(/[/s-]+/gm, '_')
+	const problemName = problemDir.replaceAll(/[\s-]+/gm, '_')
 											.replaceAll(/\W+/gm, '');
 	
 	return content.replaceAll('$problemName', problemName);
