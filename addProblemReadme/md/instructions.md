@@ -60,7 +60,7 @@ Use formatting to highlight the ideas a reader should internalize, not for decor
 Wrap in backticks any token that appears literally in code:
 
 - Variable names: `` `left` ``, `` `right` ``, `` `result` ``
-- Data structure literals: `` `{}` ``, `` `[]` ``, `` `None` ``
+- Data structure and literals: `` `{}` ``, `` `[]` ``, `` `None` ``, `` `arr = ["one", "two", "three"]` ``
 - Method calls: `` `append()` ``, `` `pop()` ``
 - Concrete values: `` `0` ``, `` `true` ``, `` `""` ``
 - Type names when referenced as code: `` `int` ``, `` `string` ``
