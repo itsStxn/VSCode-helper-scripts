@@ -33,7 +33,15 @@ Read the provided code in **SOLUTION** (see down below). Pay close attention to:
 ### Step 3 — Determine approach count
 
 - **Single approach** → use the Single-Approach from **TEMPLATES** (see down below)
-- **Two or more approaches** → use the Multi-Approach from **TEMPLATES** (see down below)
+- **Order for two or more approaches** → The primary solution is **always** implemented in class ***Solution***.
+  - Any additional methods must be implemented as alternatives in separate classes named sequentially:
+    - **Alternative1** = **second** approach
+    - **Alternative2** = **third** approach
+    - **Alternative3** = **fourth** approach
+    - ... and so on in increasing order.
+- **Templates for two or more approaches** → use the Multi-Approach from **TEMPLATES** (see down below)
+
+rewrite this to optimize agent instruction
 
 As just mentioned, both templates are defined in **TEMPLATES** (see down below). Read that now.
 
