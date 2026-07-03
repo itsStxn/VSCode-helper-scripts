@@ -468,10 +468,11 @@ async function fetchProblemDesc(titleSlug: string): Promise<{ content: string }>
 			variables: { titleSlug },
 		}),
 	});
-
+	
 	const data: T.LeetCodeProblemResponse = await res.json();
+	const question = data?.data?.question;
 
-	if (!data?.data?.question) {
+	if (!question?.content) {
 		throw new Error(`Problem not found for slug: "${titleSlug}".`);
 	}
 
