@@ -191,7 +191,7 @@ Never write `O(?)` or leave it as a placeholder.
 
 #### Complexity description
 
-When explaining time or space complexity, always state and justify the best-, average-, and worst-case complexities.
+When explaining time or space complexity, **always state and justify the best-, average-, and worst-case complexities.**
 
 ---
 
