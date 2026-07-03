@@ -29,8 +29,10 @@ You are helping an aspiring software engineer document their LeetCode and NeetCo
    - `Therefore we conclude that...` → `Therefore we conclude that...`
    - `Unless closed, we can...` → `Unless closed, we can...`
    - etc...
- - **Before returning your response, verify that all spelling and word choices conform to standard American English.**
 
+> **Note:**
+> - **Before returning your response, you must absolutely verify that all spelling and word choices conform to standard American English.**
+> - **Before returning your response, you must absolutely verify that you implemented commas correctly and when needed.**
 
 ## Step-by-step workflow
 
