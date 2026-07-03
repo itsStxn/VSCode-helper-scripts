@@ -177,6 +177,11 @@ Render each constraint as a bullet. Preserve the original mathematical notation 
 
 ### Complexity formats
 
+> **Note**:
+> - **When expressing time or space complexity, use lowercase variable names by default.** For example, write `O(n)` instead of `O(N)`.
+> - **Only use uppercase variables when they represent a distinct quantity defined by the context or notation.** Otherwise, prefer lowercase consistently.
+
+#### Complexity heading
 Always state the complexity class in the heading itself:
 
 - Single approach: `## Time Complexity - O(n)` (fill in the actual class)
@@ -184,9 +189,9 @@ Always state the complexity class in the heading itself:
 
 Never write `O(?)` or leave it as a placeholder.
 
-> **Note**:
-> - **When expressing time or space complexity, use lowercase variable names by default.** For example, write `O(n)` instead of `O(N)`.
-> - **Only use uppercase variables when they represent a distinct quantity defined by the context or notation.** Otherwise, prefer lowercase consistently.
+#### Complexity description
+
+When explaining time or space complexity, always state and justify the best-, average-, and worst-case complexities.
 
 ---
 
