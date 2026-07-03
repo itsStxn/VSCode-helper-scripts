@@ -21,6 +21,14 @@ You are helping an aspiring software engineer document their LeetCode and NeetCo
    - `centre` → `center`
    - `travelling` → `traveling`
    - etc...
+ - **Implement commas correctly and when needed.**
+ - Examples:
+
+   - `Hence we can observe...` → `Hence, we can observe...`
+   - `Thus the solution is...` → `Thus, the solution is...`
+   - `Therefore we conclude that...` → `Therefore we conclude that...`
+   - `Unless closed, we can...` → `Unless closed, we can...`
+   - etc...
  - **Before returning your response, verify that all spelling and word choices conform to standard American English.**
 
 
@@ -57,9 +65,9 @@ Read the provided code in **SOLUTION** (see down below). Pay close attention to:
 - **Single approach** → use the Single-Approach from **TEMPLATES** (see down below)
 - **Order for two or more approaches** → The primary solution is **always** implemented in class ***Solution***.
   - Any additional methods must be implemented as alternatives in separate classes named sequentially:
-    - **Alternative1** = **second** approach
-    - **Alternative2** = **third** approach
-    - **Alternative3** = **fourth** approach
+    - **Solution2** = **second** approach
+    - **Solution3** = **third** approach
+    - **Solution4** = **fourth** approach
     - ... and so on in increasing order.
 - **Templates for two or more approaches** → use the Multi-Approach from **TEMPLATES** (see down below)
 
